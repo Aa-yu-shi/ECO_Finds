@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco_Finds API Test Interface</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .test-section h3 {
+            color: #34495e;
+            margin-top: 0;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .success {
+            background-color: #27ae60;
+        }
+        .error {
+            background-color: #e74c3c;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .result.success {
+            background-color: #d5f4e6;
+            border: 1px solid #27ae60;
+        }
+        .result.error {
+            background-color: #fadbd8;
+            border: 1px solid #e74c3c;
+        }
+        .tokens {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .status {
+            text-align: center;
+            padding: 10px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.connected {
+            background-color: #d5f4e6;
+            color: #27ae60;
+        }
+        .status.disconnected {
+            background-color: #fadbd8;
+            color: #e74c3c;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌱 Eco_Finds API Test Interface</h1>
+        
+        <div id="connection-status" class="status disconnected">
+            🔴 Checking server connection...
+        </div>
+
+        <div class="tokens">
+            <h4>🔑 Authentication Tokens</h4>
+            <div>Seller Token: <span id="seller-token">Not logged in</span></div>
+            <div>Buyer Token: <span id="buyer-token">Not logged in</span></div>
+        </div>
+
+        <div class="grid">
+            <!-- Authentication Tests -->
+            <div class="test-section">
+                <h3>🔐 Authentication Tests</h3>
+                
+                <button onclick="testHealthCheck()">Health Check</button>
+                <div id="health-result" class="result" style="display:none;"></div>
+
+                <button onclick="registerSeller()">Register Seller</button>
+                <div id="seller-register-result" class="result" style="display:none;"></div>
+
+                <button onclick="registerBuyer()">Register Buyer</button>
+                <div id="buyer-register-result" class="result" style="display:none;"></div>
+
+                <button onclick="testInvalidAuth()">Test Invalid Auth</button>
+                <div id="invalid-auth-result" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Product Tests -->
+            <div class="test-section">
+                <h3>📦 Product Management</h3>
+                
+                <button onclick="createProduct()" id="create-product-btn" disabled>Create Product</button>
+                <div id="create-product-result" class="result" style="display:none;"></div>
+
+                <button onclick="getAllProducts()">Get All Products</button>
+                <div id="get-products-result" class="result" style="display:none;"></div>
+
+                <button onclick="searchProducts()">Search Products</button>
+                <div id="search-result" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Cart Tests -->
+            <div class="test-section">
+                <h3>🛒 Shopping Cart</h3>
+                
+                <button onclick="addToCart()" id="add-cart-btn" disabled>Add to Cart</button>
+                <div id="add-cart-result" class="result" style="display:none;"></div>
+
+                <button onclick="getCart()" id="get-cart-btn" disabled>Get Cart</button>
+                <div id="get-cart-result" class="result" style="display:none;"></div>
+            </div>
+
+            <!-- Dashboard Tests -->
+            <div class="test-section">
+                <h3>📊 Dashboard Access</h3>
+                
+                <button onclick="getBuyerDashboard()" id="buyer-dashboard-btn" disabled>Buyer Dashboard</button>
+                <div id="buyer-dashboard-result" class="result" style="display:none;"></div>
+
+                <button onclick="getSellerDashboard()" id="seller-dashboard-btn" disabled>Seller Dashboard</button>
+                <div id="seller-dashboard-result" class="result" style="display:none;"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Run All Tests</h3>
+            <button onclick="runAllTests()" style="background-color: #9b59b6; font-size: 16px; padding: 15px 30px;">
+                🚀 Run Complete Test Suite
+            </button>
+            <div id="all-tests-result" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:5000';
+        let sellerToken = '';
+        let buyerToken = '';
+        let productId = '';
+        let testResults = [];
+
+        // Utility functions
+        function showResult(elementId, success, message, data = null) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `result ${success ? 'success' : 'error'}`;
+            element.textContent = success ? `✅ ${message}` : `❌ ${message}`;
+            if (data) {
+                element.textContent += '\n\nResponse:\n' + JSON.stringify(data, null, 2);
+            }
+        }
+
+        function updateTokenDisplay() {
+            document.getElementById('seller-token').textContent = sellerToken ? '✅ Logged in' : 'Not logged in';
+            document.getElementById('buyer-token').textContent = buyerToken ? '✅ Logged in' : 'Not logged in';
+            
+            // Enable/disable buttons based on token availability
+            document.getElementById('create-product-btn').disabled = !sellerToken;
+            document.getElementById('seller-dashboard-btn').disabled = !sellerToken;
+            document.getElementById('add-cart-btn').disabled = !buyerToken || !productId;
+            document.getElementById('get-cart-btn').disabled = !buyerToken;
+            document.getElementById('buyer-dashboard-btn').disabled = !buyerToken;
+        }
+
+        // Test functions
+        async function testHealthCheck() {
+            try {
+                const response = await fetch(`${BASE_URL}/`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('health-result', true, 'Server is running!', data);
+                    document.getElementById('connection-status').className = 'status connected';
+                    document.getElementById('connection-status').innerHTML = '🟢 Server Connected';
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                showResult('health-result', false, `Connection failed: ${error.message}`);
+                document.getElementById('connection-status').className = 'status disconnected';
+                document.getElementById('connection-status').innerHTML = '🔴 Server Disconnected';
+            }
+        }
+
+        async function registerSeller() {
+            try {
+                const response = await fetch(`${BASE_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'Test Seller',
+                        email: 'seller@test.com',
+                        password: 'password123',
+                        role: 'seller'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    sellerToken = data.token;
+                    updateTokenDisplay();
+                    showResult('seller-register-result', true, 'Seller registered successfully!', data);
+                } else if (response.status === 400 && data.message.includes('already exists')) {
+                    // Try to login instead
+                    await loginSeller();
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                showResult('seller-register-result', false, `Registration failed: ${error.message}`);
+            }
+        }
+
+        async function loginSeller() {
+            try {
+                const response = await fetch(`${BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'seller@test.com',
+                        password: 'password123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    sellerToken = data.token;
+                    updateTokenDisplay();
+                    showResult('seller-register-result', true, 'Seller logged in successfully!', data);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                showResult('seller-register-result', false, `Login failed: ${error.message}`);
+            }
+        }
+
+        async function registerBuyer() {
+            try {
+                const response = await fetch(`${BASE_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'Test Buyer',
+                        email: 'buyer@test.com',
+                        password: 'password123',
+                        role: 'buyer'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    buyerToken = data.token;
+                    updateTokenDisplay();
+                    showResult('buyer-register-result', true, 'Buyer registered successfully!', data);
+                } else if (response.status === 400 && data.message.includes('already exists')) {
+                    await loginBuyer();
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                showResult('buyer-register-result', false, `Registration failed: ${error.message}`);
+            }
+        }
+
+        async function loginBuyer() {
+            try {
+                const response = await fetch(`${BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'buyer@test.com',
+                        password: 'password123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    buyerToken = data.token;
+                    updateTokenDisplay();
+                    showResult('buyer-register-result', true, 'Buyer logged in successfully!', data);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                showResult('buyer-register-result', false, `Login failed: ${error.message}`);
+            }
+        }
+
+        async function createProduct() {
+            try {
+                const response = await fetch(`${BASE_URL}/api/products`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sellerToken}`
+                    },
+                    body: JSON.stringify({
+                        title: 'Eco-Friendly Bamboo Toothbrush',
+                        description: 'Sustainable bamboo toothbrush with soft bristles',
+                        category: 'Personal Care',
+                        price: 12.99,
+                        stock_quantity: 100,
+                        product_condition: 'new'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    productId = data.productId;
+                    updateTokenDisplay();
+                    showResult('create-product-result', true, 'Product created successfully!', data);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                showResult('create-product-result', false, `Product creation failed: ${error.message}`);
+            }
+        }
+
+        async function getAllProducts() {
+            try {
+                const response = await fetch(`${BASE_URL}/api/products`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('get-products-result', true, `Retrieved ${data.products.length} products`, data);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                showResult('get-products-result', false, `Failed to get products: ${error.message}`);
+            }
+        }
+
+        async function searchProducts() {
+            try {
+                const response = await fetch(`${BASE_URL}/api/search?q=bamboo&category=Personal Care`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('search-result', true, `Found ${data.products.length} products`, data);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                showResult('search-result', false, `Search failed: ${error.message}`);
+            }
+        }
+
+        async function addToCart() {
+            try {
+                const response = await fetch(`${BASE_URL}/api/cart`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${buyerToken}`
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        quantity: 2
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('add-cart-result', true, 'Item added to cart!', data);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                showResult('add-cart-result', false, `Add to cart failed: ${error.message}`);
+            }
+        }
+
+        async function getCart() {
+            try {
+                const response = await fetch(`${BASE_URL}/api/cart`, {
+                    headers: { 'Authorization': `Bearer ${buyerToken}` }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('get-cart-result', true, `Cart has ${data.cart.item_count} items`, data);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                showResult('get-cart-result', false, `Get cart failed: ${error.message}`);
+            }
+        }
+
+        async function getBuyerDashboard() {
+            try {
+                const response = await fetch(`${BASE_URL}/api/buyer/home`, {
+                    headers: { 'Authorization': `Bearer ${buyerToken}` }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('buyer-dashboard-result', true, 'Buyer dashboard loaded!', data);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                showResult('buyer-dashboard-result', false, `Buyer dashboard failed: ${error.message}`);
+            }
+        }
+
+        async function getSellerDashboard() {
+            try {
+                const response = await fetch(`${BASE_URL}/api/seller/home`, {
+                    headers: { 'Authorization': `Bearer ${sellerToken}` }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('seller-dashboard-result', true, 'Seller dashboard loaded!', data);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                showResult('seller-dashboard-result', false, `Seller dashboard failed: ${error.message}`);
+            }
+        }
+
+        async function testInvalidAuth() {
+            try {
+                const response = await fetch(`${BASE_URL}/api/auth/profile`, {
+                    headers: { 'Authorization': 'Bearer invalid_token' }
+                });
+                
+                const data = await response.json();
+                
+                if (response.status === 401) {
+                    showResult('invalid-auth-result', true, 'Invalid token correctly rejected!', data);
+                } else {
+                    showResult('invalid-auth-result', false, 'Security issue: Invalid token was accepted!', data);
+                }
+            } catch (error) {
+                showResult('invalid-auth-result', false, `Auth test failed: ${error.message}`);
+            }
+        }
+
+        async function runAllTests() {
+            const resultElement = document.getElementById('all-tests-result');
+            resultElement.style.display = 'block';
+            resultElement.className = 'result';
+            resultElement.textContent = '🧪 Running comprehensive test suite...\n\n';
+            
+            const tests = [
+                { name: 'Health Check', func: testHealthCheck },
+                { name: 'Seller Registration', func: registerSeller },
+                { name: 'Buyer Registration', func: registerBuyer },
+                { name: 'Product Creation', func: createProduct },
+                { name: 'Get All Products', func: getAllProducts },
+                { name: 'Search Products', func: searchProducts },
+                { name: 'Add to Cart', func: addToCart },
+                { name: 'Get Cart', func: getCart },
+                { name: 'Buyer Dashboard', func: getBuyerDashboard },
+                { name: 'Seller Dashboard', func: getSellerDashboard },
+                { name: 'Invalid Auth Test', func: testInvalidAuth }
+            ];
+            
+            let passed = 0;
+            let failed = 0;
+            
+            for (const test of tests) {
+                try {
+                    await test.func();
+                    passed++;
+                    resultElement.textContent += `✅ ${test.name}: PASSED\n`;
+                } catch (error) {
+                    failed++;
+                    resultElement.textContent += `❌ ${test.name}: FAILED - ${error.message}\n`;
+                }
+                // Small delay between tests
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            resultElement.textContent += `\n📊 TEST RESULTS:\n`;
+            resultElement.textContent += `✅ Passed: ${passed}\n`;
+            resultElement.textContent += `❌ Failed: ${failed}\n`;
+            resultElement.textContent += `📈 Success Rate: ${((passed / (passed + failed)) * 100).toFixed(1)}%\n\n`;
+            
+            if (failed === 0) {
+                resultElement.className = 'result success';
+                resultElement.textContent += '🎉 ALL TESTS PASSED! Your Eco_Finds backend is working perfectly!';
+            } else {
+                resultElement.className = 'result error';
+                resultElement.textContent += '⚠️ Some tests failed. Check individual test results above.';
+            }
+        }
+
+        // Initialize
+        window.onload = function() {
+            testHealthCheck();
+            updateTokenDisplay();
+        };
+    </script>
+</body>
+</html>

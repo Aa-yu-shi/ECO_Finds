@@ -1,71 +1,9 @@
-// const db = require('../config/db');
-
-// // Create new product
-// exports.createProduct = (req, res) => {
-//   const { title, description, category, price, image } = req.body;
-//   const user_id = req.user.id; // from JWT auth middleware
-
-//   const query = "INSERT INTO products (user_id, title, description, category, price, image) VALUES (?, ?, ?, ?, ?, ?)";
-//   db.query(query, [user_id, title, description, category, price, image], (err, result) => {
-//     if (err) return res.status(500).json({ message: err.message });
-//     res.status(201).json({ message: "Product created", productId: result.insertId });
-//   });
-// };
-
-// // Get all products of logged-in user
-// exports.getUserProducts = (req, res) => {
-//   const user_id = req.user.id;
-//   const query = "SELECT * FROM products WHERE user_id = ?";
-//   db.query(query, [user_id], (err, results) => {
-//     if (err) return res.status(500).json({ message: err.message });
-//     res.status(200).json(results);
-//   });
-// };
-
-// // Get single product by ID
-// exports.getProductById = (req, res) => {
-//   const { id } = req.params;
-//   const user_id = req.user.id;
-//   const query = "SELECT * FROM products WHERE id = ? AND user_id = ?";
-//   db.query(query, [id, user_id], (err, results) => {
-//     if (err) return res.status(500).json({ message: err.message });
-//     if (results.length === 0) return res.status(404).json({ message: "Product not found" });
-//     res.status(200).json(results[0]);
-//   });
-// };
-
-// // Update product
-// exports.updateProduct = (req, res) => {
-//   const { id } = req.params;
-//   const { title, description, category, price, image } = req.body;
-//   const user_id = req.user.id;
-
-//   const query = "UPDATE products SET title=?, description=?, category=?, price=?, image=? WHERE id=? AND user_id=?";
-//   db.query(query, [title, description, category, price, image, id, user_id], (err, result) => {
-//     if (err) return res.status(500).json({ message: err.message });
-//     if (result.affectedRows === 0) return res.status(404).json({ message: "Product not found or unauthorized" });
-//     res.status(200).json({ message: "Product updated" });
-//   });
-// };
-
-// // Delete product
-// exports.deleteProduct = (req, res) => {
-//   const { id } = req.params;
-//   const user_id = req.user.id;
-
-//   const query = "DELETE FROM products WHERE id=? AND user_id=?";
-//   db.query(query, [id, user_id], (err, result) => {
-//     if (err) return res.status(500).json({ message: err.message });
-//     if (result.affectedRows === 0) return res.status(404).json({ message: "Product not found or unauthorized" });
-//     res.status(200).json({ message: "Product deleted" });
-//   });
-// };
 const { pool } = require('../config/db');
 
 // Create new product
 const createProduct = async (req, res) => {
   try {
-    const { title, description, category, price, image, stock_quantity } = req.body;
+    const { title, description, category, price, image, stock_quantity, product_condition } = req.body;
     const user_id = req.user.id;
 
     // Validate required fields
@@ -84,8 +22,8 @@ const createProduct = async (req, res) => {
     }
 
     const [result] = await pool.execute(
-      'INSERT INTO products (user_id, title, description, category, price, image, stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [user_id, title, description, category, price, image, stock_quantity || 0]
+      'INSERT INTO products (user_id, title, description, category, price, image, stock_quantity, product_condition) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [user_id, title, description, category, price, image, stock_quantity || 0, product_condition || 'good']
     );
 
     res.status(201).json({
@@ -228,7 +166,7 @@ const getUserProducts = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, category, price, image, stock_quantity, is_available } = req.body;
+    const { title, description, category, price, image, stock_quantity, is_available, product_condition } = req.body;
     const user_id = req.user.id;
 
     // Check if product exists and belongs to user
@@ -245,8 +183,8 @@ const updateProduct = async (req, res) => {
     }
 
     const [result] = await pool.execute(
-      'UPDATE products SET title=?, description=?, category=?, price=?, image=?, stock_quantity=?, is_available=? WHERE id=? AND user_id=?',
-      [title, description, category, price, image, stock_quantity, is_available, id, user_id]
+      'UPDATE products SET title=?, description=?, category=?, price=?, image=?, stock_quantity=?, is_available=?, product_condition=? WHERE id=? AND user_id=?',
+      [title, description, category, price, image, stock_quantity, is_available, product_condition, id, user_id]
     );
 
     res.json({

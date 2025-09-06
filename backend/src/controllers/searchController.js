@@ -48,9 +48,9 @@ const searchProducts = async (req, res) => {
       params.push(max_price);
     }
 
-    // Condition filter (if you add condition field to products table)
+    // Condition filter
     if (condition) {
-      query += ' AND p.condition = ?';
+      query += ' AND p.product_condition = ?';
       params.push(condition);
     }
 
@@ -69,17 +69,18 @@ const searchProducts = async (req, res) => {
         query += ' ORDER BY p.created_at ASC';
         break;
       case 'popular':
-        // You can implement popularity based on views/purchases
-        query += ' ORDER BY p.created_at DESC';
+        query += ' ORDER BY p.created_at DESC'; // You can implement actual popularity later
         break;
       default: // relevance
         if (q) {
-          query += ' ORDER BY 
-            CASE 
-              WHEN p.title LIKE ? THEN 1 
-              WHEN p.description LIKE ? THEN 2 
-              ELSE 3 
-            END, p.created_at DESC';
+          query += `
+            ORDER BY 
+              CASE 
+                WHEN p.title LIKE ? THEN 1 
+                WHEN p.description LIKE ? THEN 2 
+                ELSE 3 
+              END, p.created_at DESC
+          `;
           const searchTerm = `%${q}%`;
           params.push(searchTerm, searchTerm);
         } else {
@@ -114,7 +115,7 @@ const searchProducts = async (req, res) => {
       countParams.push(max_price);
     }
     if (condition) {
-      countQuery += ' AND p.condition = ?';
+      countQuery += ' AND p.product_condition = ?';
       countParams.push(condition);
     }
 
@@ -163,7 +164,7 @@ const searchProducts = async (req, res) => {
 const getSearchSuggestions = async (req, res) => {
   try {
     const { q } = req.query;
-    
+
     if (!q || q.length < 2) {
       return res.json({
         success: true,
@@ -201,8 +202,6 @@ const getSearchSuggestions = async (req, res) => {
 // Get popular searches
 const getPopularSearches = async (req, res) => {
   try {
-    // This would typically come from a search_logs table
-    // For now, we'll return popular categories and product titles
     const [popularCategories] = await pool.execute(`
       SELECT category, COUNT(*) as search_count
       FROM products 

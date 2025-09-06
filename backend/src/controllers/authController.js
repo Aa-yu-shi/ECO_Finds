@@ -33,10 +33,10 @@ const register = async (req, res) => {
     }
 
     // Role validation
-    if (!['buyer', 'seller'].includes(role)) {
+    if (!['buyer', 'seller', 'admin'].includes(role)) {
       return res.status(400).json({
         success: false,
-        message: 'Role must be either "buyer" or "seller"'
+        message: 'Role must be either "buyer", "seller", or "admin"'
       });
     }
 

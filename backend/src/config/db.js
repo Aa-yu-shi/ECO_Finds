@@ -40,7 +40,7 @@ const initializeTables = async () => {
         username VARCHAR(50) NOT NULL UNIQUE,
         email VARCHAR(100) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
-        role ENUM('buyer', 'seller') NOT NULL,
+        role ENUM('buyer', 'seller', 'admin') NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
@@ -57,6 +57,7 @@ const initializeTables = async () => {
         price DECIMAL(10,2) NOT NULL,
         image VARCHAR(500),
         stock_quantity INT DEFAULT 0,
+        product_condition ENUM('new', 'like_new', 'good', 'fair', 'poor') DEFAULT 'good',
         is_available BOOLEAN DEFAULT true,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
